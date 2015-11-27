@@ -32,7 +32,7 @@ From this, we can create a template that looks like this
     # /path/to/config.yaml
     {% if private['ips'] %}
     private_ips:{% for ip in private['ips'] %}
-      - {{ ip }}{% endfor %}
+      - {{ ip }}{% endfor %}{% endif %}
 
 We'll be using this template in the following examples.
 
