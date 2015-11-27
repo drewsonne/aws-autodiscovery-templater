@@ -1,0 +1,16 @@
+{% if private['ips'] %}
+private_ips:{% for ip in private['ips'] %}
+  - {{ ip }}{% endfor %}
+{% endif %}
+{% if private['hostnames'] %}
+private_hostnames:{% for hostname in private['hostnames'] %}
+  - {{ hostname }}{% endfor %}
+{% endif %}
+{% if public['ips'] %}
+public_ips:{% for ip in public['ips'] %}
+  - {{ ip }}{% endfor %}
+{% endif %}
+{% if public['hostnames'] %}
+public_hostnames:{% for hostname in public['hostnames'] %}
+  - {{ hostname }}{% endfor %}
+{% endif %}
