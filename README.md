@@ -11,15 +11,15 @@ The easiest way is to use the included cli tool (although there is a small pytho
 _Note:_ Before you run any of this, you need to have either your AWS credentials set up in 
 `~/.aws/{config,credentials}`, or in `AWS_*` environment variables.
 
-    # /path/to/template.config
+    # /path/to/config.yaml
     {% if private['ips'] %}
     private_ips:{% for ip in private['ips'] %}
       - {{ ip }}{% endfor %}
 
-
+ 
 
     $ aws-autodiscovery-templater \
-      --template-path /path/to/template.config \ # Path to jina2 formatted template
+      --template-path /path/to/config.yaml \ # Path to jina2 formatted template
       --profile my-aws-profile \                 # AWS credentials as defined in ~/.aws/credentials
       --stdout \                                 # Print result to stdout
       --filter-empty                             # Don't include null/missing values (eg. not all machines have public IPs
