@@ -16,7 +16,7 @@ _Note:_ Before you run any of this, you need to have either your AWS credentials
     private_ips:{% for ip in private['ips'] %}
       - {{ ip }}{% endfor %}
       
-Example run:
+## Example run
 
     $ aws-autodiscovery-templater \
       --template-path /path/to/config.yaml \ # Path to jina2 formatted template
@@ -24,6 +24,16 @@ Example run:
       --stdout \                                 # Print result to stdout
       --filter-empty                             # Don't include null/missing values (eg. not all machines have public IPs
 
+## Filtering instances
+More importantly, you can filter instances based on their tags. This filter is a json objectstructured in the same
+manner as described in [boto3.ec2.describe_instances()](http://boto3.readthedocs.org/en/latest/reference/services/ec2.html#EC2.Client.describe_instances).
+
+    $ aws-autodiscovery-templater \
+      --template-path /path/to/config.yaml \ 
+      --profile my-aws-profile \
+      --stdout \
+      --filter-empty
+      --filters '[{"Name":"tag-value","Values":"Product"},{"Name":"tag-key","Values":"MyApplications"}]'
 
 Inline help:
 
