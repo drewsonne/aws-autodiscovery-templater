@@ -12,5 +12,6 @@ aws-autodiscovery-templater=awsautodiscoverytemplater.cli_wrapper:run
     ''',
     author_email='drew.sonne@gmail.com',
     author='Drew J. Sonne',
-    url='https://github.com/drewsonne/aws-autodiscovery-templater'
+    url='https://github.com/drewsonne/aws-autodiscovery-templater',
+    download_url = 'https://github.com/drewsonne/aws-autodiscovery-templater/tarball/1.0.0', # I'll explain this in a second
 )
