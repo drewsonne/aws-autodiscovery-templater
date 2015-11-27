@@ -6,15 +6,32 @@ ips/hosts for hosts in a config file will be enough, and that's what this script
 
 # Usage
 
-The easiest way is to use the included cli tool (although there is a small python library which you can use).\
+The easiest way is to use the included cli tool (although there is a small python library which you can use). This project
+uses the [jinja2 templating engine](http://jinja.pocoo.org/docs/dev/), so you can find details there about how to write templates.
+The following variables are passed to the templating engine:
 
-_Note:_ Before you run any of this, you need to have either your AWS credentials set up in 
-`~/.aws/{config,credentials}`, or in `AWS_*` environment variables.
+    {
+        "private": {
+            "ips": [...],
+            "hostnames": [...]
+        },
+        "public": {
+            "ips": [...],
+            "hostnames": [...]
+        }
+    }
+
+From this, we can create a template that looks like this
 
     # /path/to/config.yaml
     {% if private['ips'] %}
     private_ips:{% for ip in private['ips'] %}
       - {{ ip }}{% endfor %}
+
+We'll be using this template in the following examples.
+
+_Note:_ Before you run any of this, you need to have either your AWS credentials set up in 
+`~/.aws/{config,credentials}`, or in `AWS_*` environment variables.
       
 ## Example run
 
