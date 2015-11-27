@@ -17,15 +17,15 @@ def parse_cli_args_into():
     ])
     main_parser = cli_arg_parser.add_argument_group('AWS Autodiscovery Templater')
 
-    template_location = main_parser.add_mutually_exclusive_group(required=True)
-    template_location.add_argument('--template-path', help='Path to the template to fill variables into.')
-    template_location.add_argument('--template-s3-uri', help='S3 URI to the template to fill variables into.')
+    # template_location = main_parser.add_mutually_exclusive_group(required=True)
+    main_parser.add_argument('--template-path', help='Path to the template to fill variables into.', required=True)
+    # template_location.add_argument('--template-s3-uri', help='S3 URI to the template to fill variables into.')
 
-    output = main_parser.add_mutually_exclusive_group(required=True)
-    output.add_argument('--destination-path',
-                        help='Destination for the source once the template has been rendered.')
-    output.add_argument('--stdout', help='Prints a json object containing the retrieves resources', action='store_true',
-                        default=False)
+    # output = main_parser.add_mutually_exclusive_group(required=True)
+    # output.add_argument('--destination-path',
+    #                     help='Destination for the source once the template has been rendered.')
+    main_parser.add_argument('--stdout', help='Prints a json object containing the retrieves resources', action='store_true',
+                        default=False, required=True)
 
     main_parser.add_argument('--vpc-ids',
                              help='Optionally restrict the filtering to a particular list of IPs. Comma seperated list of vpc-ids.',
