@@ -34,8 +34,13 @@ manner as described in [aws ec2 describe-instances](http://docs.aws.amazon.com/c
       --stdout \
       --filter-empty
       --filter "Name=tag:Application,Values=[mongodb,mongodb-master]"
+     private_ips:
+       - 10.0.0.20
+       - 10.0.0.10
+       - 10.0.0.30
+     
 
-Inline help:
+## Inline help:
 
     # For more details, have a look at the --help option
     $ aws-autodiscovery-templater --help
