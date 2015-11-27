@@ -15,8 +15,8 @@ _Note:_ Before you run any of this, you need to have either your AWS credentials
     {% if private['ips'] %}
     private_ips:{% for ip in private['ips'] %}
       - {{ ip }}{% endfor %}
-
-
+      
+Example run:
 
     $ aws-autodiscovery-templater \
       --template-path /path/to/template.config \ # Path to jina2 formatted template
@@ -25,7 +25,7 @@ _Note:_ Before you run any of this, you need to have either your AWS credentials
       --filter-empty                             # Don't include null/missing values (eg. not all machines have public IPs
 
 
-
+Inline help:
 
     # For more details, have a look at the --help option
     $ aws-autodiscovery-templater --help
