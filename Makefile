@@ -4,10 +4,10 @@ rst-readme:
 build:
 	python setup.py sdist bdist_wheel
 
-release-test: rst-readme build
+release-test: clean rst-readme build
 	twine upload -r pypitest dist/aws-autodiscovery-templater-*
 
-release: rst-readme build
+release: clean rst-readme build
 	twine upload -r pypi dist/aws-autodiscovery-templater-*
 
 clean:
