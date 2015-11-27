@@ -4,6 +4,11 @@ Auto discovery in AWS can be tricky for legacy applications. Due to time or comp
 auto discovery code to let applications find each other in an elastic/scaling environment. Sometimes, listing the
 ips/hosts for hosts in a config file will be enough, and that's what this script does.
 
+# Installation
+Installation is simply
+
+    $ pip install aws-autodiscovery-templater
+
 # Usage
 
 The easiest way is to use the included cli tool (although there is a small python library which you can use). This project
