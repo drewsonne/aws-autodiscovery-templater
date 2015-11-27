@@ -26,14 +26,14 @@ _Note:_ Before you run any of this, you need to have either your AWS credentials
 
 ## Filtering instances
 More importantly, you can filter instances based on their tags. This filter is a json objectstructured in the same
-manner as described in [boto3.ec2.describe_instances()](http://boto3.readthedocs.org/en/latest/reference/services/ec2.html#EC2.Client.describe_instances).
+manner as described in [aws ec2 describe-instances](http://docs.aws.amazon.com/cli/latest/reference/ec2/describe-instances.html).
 
     $ aws-autodiscovery-templater \
       --template-path /path/to/config.yaml \ 
       --profile my-aws-profile \
       --stdout \
       --filter-empty
-      --filters '[{"Name":"tag-value","Values":"Product"},{"Name":"tag-key","Values":"MyApplications"}]'
+      --filter "Name=tag:Application,Values=[mongodb,mongodb-master]"
 
 Inline help:
 

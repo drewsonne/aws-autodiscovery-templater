@@ -2,6 +2,7 @@ import argparse
 import json
 import os
 from urlparse import urlparse
+import re
 from awsautodiscoverytemplater import auth
 from jinja2 import Template
 from awsautodiscoverytemplater.auth import default_session
@@ -134,7 +135,12 @@ class TemplateRequest():
         """
         describe_request_params = {}
         if self.filter is not None:
-            describe_request_params['Filters'] = json.loads(self.filter)
+            try:
+                filters = json.loads(self.filter)
+            except Exception as TypeError:
+                filters = self._parse_cli_filters(self.filter)
+
+            describe_request_params['Filters'] = filters
         if self.vpc_ids is not None:
             if 'Filters' not in describe_request_params:
                 describe_request_params['Filters'] = []
@@ -186,3 +192,13 @@ class TemplateRequest():
             },
             'reservations': reservations
         }
+
+    def _parse_cli_filters(self, filters):
+        parsed_filters = []
+        for filter in filters:
+            filter_parts = re.match('^Name=(?P<name_value>[^,]+),Values=\[?(?P<key_values>[^\]]+)\]?', filter)
+            parsed_filters.append({
+                'Name': filter_parts.group('name_value'),
+                'Values': filter_parts.group('key_values').split(',')
+            })
+        return parsed_filters
