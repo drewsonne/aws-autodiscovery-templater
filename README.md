@@ -16,6 +16,8 @@ _Note:_ Before you run any of this, you need to have either your AWS credentials
     private_ips:{% for ip in private['ips'] %}
       - {{ ip }}{% endfor %}
 
+
+
     $ aws-autodiscovery-templater \
       --template-path /path/to/template.config \ # Path to jina2 formatted template
       --profile my-aws-profile \                 # AWS credentials as defined in ~/.aws/credentials
@@ -23,7 +25,9 @@ _Note:_ Before you run any of this, you need to have either your AWS credentials
       --filter-empty                             # Don't include null/missing values (eg. not all machines have public IPs
 
 
-    # For more details, ahve a look at 
+
+
+    # For more details, have a look at the --help option
     $ aws-autodiscovery-templater --help
     usage: aws-autodiscovery-templater [-h]
                                        [--aws-access-key-id AWS_ACCESS_KEY_ID]
