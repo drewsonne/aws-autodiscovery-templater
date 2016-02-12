@@ -54,7 +54,7 @@ class TemplateCommand(argparse.Namespace):
 
         # Perform the request
         response = TemplateRequest(
-                filter=self.filter,
+                filter_dict=self.filter,
                 session=credentials.create_session(),
                 vpc_ids=self.vpc_ids,
                 remove_nones=self.filter_empty
@@ -70,7 +70,8 @@ class TemplateCommand(argparse.Namespace):
     @staticmethod
     def output_stdout(content):
         """
-        Send output to stdout. No closure required, so this is not a generator.
+        Send content to stdout. No closure required, so this is not a generator.
+        :param str content: string to output
         :return:
         """
         print(content)
@@ -93,7 +94,7 @@ class TemplateCommand(argparse.Namespace):
     def generate_s3_template_loader(uri):
         """
         Generate a function to load the template from the provided uri.
-        :param path:
+        :param str uri:
         :return:
         """
 
@@ -125,20 +126,19 @@ class TemplateCommand(argparse.Namespace):
                 "Could not run callback with args='{args}',kwargs='{kwargs}'".format(args=args, kwargs=kwargs))
 
 
-class TemplateRequest():
+class TemplateRequest(object):
     """
     Do the request to the AWS api, and return a dict with the IP data.
     """
 
-    def __init__(self, filter=None, session=default_session, remove_nones=False, vpc_ids=None):
+    def __init__(self, session, filter_dict=None, remove_nones=False, vpc_ids=None):
         """
-        @type filter dict
-        @type session func
         :rtype dict
-        :param filter: Filter for ec2 instances as defined in http://boto3.readthedocs.org/en/latest/reference/services/ec2.html#EC2.Client.describe_instances
-        :param session: If you wish to overload the injection of the boto3 session, otherwise we use a default.
+        :param dict filter_dict: Filter for ec2 instances as defined in http://boto3.readthedocs.org/en/latest/reference
+            /services/ec2.html#EC2.Client.describe_instances
+        :param callable session: If you wish to overload the injection of the boto3 session, otherwise we use a default.
         """
-        self.filter = filter
+        self.filter = filter_dict
         self.session = session
         self.vpc_ids = vpc_ids
         self.remove_nones = remove_nones
@@ -154,8 +154,10 @@ class TemplateRequest():
             if type(self.filter) is not dict:
                 try:
                     filters = json.loads(self.filter)
-                except Exception as TypeError:
+                except TypeError:
                     filters = self._parse_cli_filters(self.filter)
+            else:
+                filters = self.filter
 
             describe_request_params['Filters'] = filters
         if self.vpc_ids is not None:
@@ -188,7 +190,7 @@ class TemplateRequest():
                 private_ip_addresses.append(instance['PrivateIpAddress'])
                 private_hostnames.append(instance['PrivateDnsName'])
 
-                if ('PublicIpAddress' in instance):
+                if 'PublicIpAddress' in instance:
                     public_ips.append(instance['PublicIpAddress'])
                 elif not self.remove_nones:
                     public_ips.append(None)
@@ -218,8 +220,8 @@ class TemplateRequest():
         :return:
         """
         parsed_filters = []
-        for filter in filters:
-            filter_parts = re.match('^Name=(?P<name_value>[^,]+),Values=\[?(?P<key_values>[^\]]+)\]?', filter)
+        for filter_entry in filters:
+            filter_parts = re.match('^Name=(?P<name_value>[^,]+),Values=\[?(?P<key_values>[^\]]+)\]?', filter_entry)
             parsed_filters.append({
                 'Name': filter_parts.group('name_value'),
                 'Values': filter_parts.group('key_values').split(',')
