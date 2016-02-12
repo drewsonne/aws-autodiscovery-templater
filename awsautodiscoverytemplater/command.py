@@ -3,9 +3,8 @@ import json
 import os
 from urlparse import urlparse
 import re
-from awsautodiscoverytemplater import auth
+import awsauthhelper as auth
 from jinja2 import Template
-from awsautodiscoverytemplater.auth import default_session
 
 __author__ = 'drews'
 
@@ -55,10 +54,10 @@ class TemplateCommand(argparse.Namespace):
 
         # Perform the request
         response = TemplateRequest(
-            filter=self.filter,
-            session=credentials.create_session(),
-            vpc_ids=self.vpc_ids,
-            remove_nones=self.filter_empty
+                filter=self.filter,
+                session=credentials.create_session(),
+                vpc_ids=self.vpc_ids,
+                remove_nones=self.filter_empty
         ).response
 
         # Fill in the template and out put it.
@@ -68,14 +67,16 @@ class TemplateCommand(argparse.Namespace):
 
         return send_output(output)
 
-    def output_stdout(self, content):
+    @staticmethod
+    def output_stdout(content):
         """
         Send output to stdout. No closure required, so this is not a generator.
         :return:
         """
         print(content)
 
-    def generate_output_file(self, path):
+    @staticmethod
+    def generate_output_file(path):
         """
         Generate a function to send the content to the file specified in 'path'
         :param path:
@@ -88,7 +89,8 @@ class TemplateCommand(argparse.Namespace):
 
         return write_file
 
-    def generate_s3_template_loader(self, uri):
+    @staticmethod
+    def generate_s3_template_loader(uri):
         """
         Generate a function to load the template from the provided uri.
         :param path:
@@ -100,9 +102,15 @@ class TemplateCommand(argparse.Namespace):
 
         return load_from_s3
 
-    def generate_file_template_load(self, path):
+    @staticmethod
+    def generate_file_template_load(path):
+        """
+        Generate the path to load the template from
+        :param path:
+        :return:
+        """
         path = os.path.expanduser(os.path.abspath(
-            path
+                path
         ))
 
         def read_file():
@@ -111,12 +119,17 @@ class TemplateCommand(argparse.Namespace):
 
         return read_file
 
-    def bad_lambda(self, *args, **kwargs):
+    @staticmethod
+    def bad_lambda(*args, **kwargs):
         raise RuntimeError(
-            "Could not run callback with args='{args}',kwargs='{kwargs}'".format(args=args, kwargs=kwargs))
+                "Could not run callback with args='{args}',kwargs='{kwargs}'".format(args=args, kwargs=kwargs))
 
 
 class TemplateRequest():
+    """
+    Do the request to the AWS api, and return a dict with the IP data.
+    """
+
     def __init__(self, filter=None, session=default_session, remove_nones=False, vpc_ids=None):
         """
         @type filter dict
@@ -197,7 +210,13 @@ class TemplateRequest():
             'reservations': reservations
         }
 
-    def _parse_cli_filters(self, filters):
+    @staticmethod
+    def _parse_cli_filters(filters):
+        """
+        Parse the filters from the CLI and turn them into a filter dict for boto.
+        :param filters:
+        :return:
+        """
         parsed_filters = []
         for filter in filters:
             filter_parts = re.match('^Name=(?P<name_value>[^,]+),Values=\[?(?P<key_values>[^\]]+)\]?', filter)
