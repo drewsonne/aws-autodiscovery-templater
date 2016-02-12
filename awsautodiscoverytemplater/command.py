@@ -1,3 +1,7 @@
+# coding=utf-8
+"""
+Command classes
+"""
 import argparse
 import json
 import os
