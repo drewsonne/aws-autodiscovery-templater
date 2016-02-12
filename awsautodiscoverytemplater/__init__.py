@@ -1,5 +1,5 @@
 import argparse
-from awsautodiscoverytemplater.auth import AWSArgumentParser
+from awsauthhelper import AWSArgumentParser
 from awsautodiscoverytemplater.command import TemplateCommand
 
 __author__ = 'drews'

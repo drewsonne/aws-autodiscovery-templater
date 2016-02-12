@@ -5,7 +5,7 @@ setup(
     version='1.0.1',
     packages=find_packages(exclude=['tests*']),
     include_package_data=True,
-    install_requires=['boto3','jinja2'],
+    install_requires=['boto3','jinja2','aws-auth-helper'],
     entry_points='''
 [console_scripts]
 aws-autodiscovery-templater=awsautodiscoverytemplater.cli_wrapper:run
