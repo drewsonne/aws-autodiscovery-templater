@@ -97,7 +97,6 @@ class TemplateCommand(argparse.Namespace):
 
         def load_from_s3():
             url_parts = urlparse(uri)
-            pass
 
         return load_from_s3
 
