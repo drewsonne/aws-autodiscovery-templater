@@ -10,6 +10,10 @@ __author__ = 'drews'
 
 
 class TemplateCommand(argparse.Namespace):
+    """
+    Contains the code to generate the output from template and supplies filters for IPs
+    """
+
     def __init__(self, **kwargs):
         self.filter_empty = False
         self.filter = None
@@ -22,6 +26,10 @@ class TemplateCommand(argparse.Namespace):
         super(TemplateCommand, self).__init__(**kwargs)
 
     def run(self):
+        """
+        Entrypoint to kick off the job to generate the templater
+        :return:
+        """
         credentials = auth.Credentials(**vars(self))
         if credentials.has_role():
             credentials.assume_role()
@@ -85,6 +93,11 @@ class TemplateCommand(argparse.Namespace):
         """
 
         def write_file(content):
+            """
+            Function to do write_file operation
+            :param content:
+            :return:
+            """
             with open(path, 'w+') as output:
                 output.write(content)
 
@@ -99,6 +112,10 @@ class TemplateCommand(argparse.Namespace):
         """
 
         def load_from_s3():
+            """
+            Function to read template from s3
+            :return:
+            """
             url_parts = urlparse(uri)
 
         return load_from_s3
@@ -106,7 +123,7 @@ class TemplateCommand(argparse.Namespace):
     @staticmethod
     def generate_file_template_load(path):
         """
-        Generate the path to load the template from
+        Generate calleable to return the content of the template on disk
         :param path:
         :return:
         """
@@ -115,13 +132,23 @@ class TemplateCommand(argparse.Namespace):
         ))
 
         def read_file():
-            with open(path, 'r') as template:
+            """
+            Read file from path and return file contents
+            :return:
+            """
+            with open(path) as template:
                 return template.read()
 
         return read_file
 
     @staticmethod
     def bad_lambda(*args, **kwargs):
+        """
+        Callback used in even no lambda is supplied for output
+        :param args:
+        :param kwargs:
+        :return:
+        """
         raise RuntimeError(
                 "Could not run callback with args='{args}',kwargs='{kwargs}'".format(args=args, kwargs=kwargs))
 
