@@ -12,13 +12,15 @@ __author__ = 'drews'
 
 class TemplateCommand(argparse.Namespace):
     def __init__(self, **kwargs):
-        super(TemplateCommand, self).__init__(**kwargs)
         self.filter_empty = False
         self.filter = None
         self.template_s3_uri = None
         self.template_path = None
         self.stdout = None
         self.destination_path = None
+        self.send_output_handler = None
+        self.vpc_ids = None
+        super(TemplateCommand, self).__init__(**kwargs)
 
     def run(self):
         credentials = auth.Credentials(**vars(self))
@@ -34,7 +36,9 @@ class TemplateCommand(argparse.Namespace):
         load_template = self.bad_lambda
 
         # Generate output handler
-        if self.stdout:
+        if self.send_output_handler:
+            send_output = self.send_output_handler
+        elif self.stdout:
             send_output = self.output_stdout
         elif self.destination_path:
             send_output = self.generate_output_file(self.destination_path)
@@ -62,7 +66,7 @@ class TemplateCommand(argparse.Namespace):
         template = Template(raw_template)
         output = template.render(**response)
 
-        send_output(output)
+        return send_output(output)
 
     def output_stdout(self, content):
         """
@@ -135,10 +139,11 @@ class TemplateRequest():
         """
         describe_request_params = {}
         if self.filter is not None:
-            try:
-                filters = json.loads(self.filter)
-            except Exception as TypeError:
-                filters = self._parse_cli_filters(self.filter)
+            if type(self.filter) is not dict:
+                try:
+                    filters = json.loads(self.filter)
+                except Exception as TypeError:
+                    filters = self._parse_cli_filters(self.filter)
 
             describe_request_params['Filters'] = filters
         if self.vpc_ids is not None:
