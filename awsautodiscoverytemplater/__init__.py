@@ -8,7 +8,6 @@ __author__ = 'drews'
 def parse_cli_args_into():
     """
     Creates the cli argparser for application specifics and AWS credentials.
-    :param namespace_class: Class to instantiate and inject cli options into
     :return: A dict of values from the cli arguments
     :rtype: TemplaterCommand
     """
@@ -29,15 +28,18 @@ def parse_cli_args_into():
                              default=False, required=True)
 
     main_parser.add_argument('--vpc-ids',
-                             help='Optionally restrict the filtering to a particular list of IPs. Comma seperated list of vpc-ids.',
+                             help=('Optionally restrict the filtering to a particular list of IPs. '
+                                   'Comma seperated list of vpc-ids.'),
                              action='store_true', default=None)
 
     main_parser.add_argument('--filter',
-                             help='Filter for ec2 instances as defined in http://boto3.readthedocs.org/en/latest/reference/services/ec2.html#EC2.Client.describe_instances',
+                             help=('Filter for ec2 instances as defined in http://boto3.readthedocs.org/en/latest/'
+                                   'reference/services/ec2.html#EC2.Client.describe_instances'),
                              default=None,
                              nargs='+')
     main_parser.add_argument('--filter-empty',
-                             help='By default, missing values are returned as null to keep private/public ip/hostname sets of equal length. This removes null values from the filter',
+                             help=('By default, missing values are returned as null to keep private/public ip/hostname'
+                                   'sets of equal length. This removes null values from the filter'),
                              action='store_true', default=False)
 
     return cli_arg_parser.parse_args(namespace=TemplateCommand())
