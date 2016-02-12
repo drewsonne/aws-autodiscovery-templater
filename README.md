@@ -1,5 +1,7 @@
 # aws-autodiscovery-templater
 
+[![Code Issues](https://www.quantifiedcode.com/api/v1/project/7eb81e9532ea405599b212e754ef1ee3/badge.svg)](https://www.quantifiedcode.com/app/project/7eb81e9532ea405599b212e754ef1ee3)
+
 Auto discovery in AWS can be tricky for legacy applications. Due to time or complexity, it's not always possible to write
 auto discovery code to let applications find each other in an elastic/scaling environment. Sometimes, listing the
 ips/hosts for hosts in a config file will be enough, and that's what this script does.
