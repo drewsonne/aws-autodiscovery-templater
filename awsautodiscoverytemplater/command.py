@@ -1,16 +1,23 @@
+# coding=utf-8
+"""
+Command classes
+"""
 import argparse
 import json
 import os
 from urlparse import urlparse
 import re
-from awsautodiscoverytemplater import auth
+import awsauthhelper as auth
 from jinja2 import Template
-from awsautodiscoverytemplater.auth import default_session
 
 __author__ = 'drews'
 
 
 class TemplateCommand(argparse.Namespace):
+    """
+    Contains the code to generate the output from template and supplies filters for IPs
+    """
+
     def __init__(self, **kwargs):
         self.filter_empty = False
         self.filter = None
@@ -23,6 +30,10 @@ class TemplateCommand(argparse.Namespace):
         super(TemplateCommand, self).__init__(**kwargs)
 
     def run(self):
+        """
+        Entrypoint to kick off the job to generate the templater
+        :return:
+        """
         credentials = auth.Credentials(**vars(self))
         if credentials.has_role():
             credentials.assume_role()
@@ -55,10 +66,10 @@ class TemplateCommand(argparse.Namespace):
 
         # Perform the request
         response = TemplateRequest(
-            filter=self.filter,
-            session=credentials.create_session(),
-            vpc_ids=self.vpc_ids,
-            remove_nones=self.filter_empty
+                filter_dict=self.filter,
+                session=credentials.create_session(),
+                vpc_ids=self.vpc_ids,
+                remove_nones=self.filter_empty
         ).response
 
         # Fill in the template and out put it.
@@ -68,14 +79,17 @@ class TemplateCommand(argparse.Namespace):
 
         return send_output(output)
 
-    def output_stdout(self, content):
+    @staticmethod
+    def output_stdout(content):
         """
-        Send output to stdout. No closure required, so this is not a generator.
+        Send content to stdout. No closure required, so this is not a generator.
+        :param str content: string to output
         :return:
         """
         print(content)
 
-    def generate_output_file(self, path):
+    @staticmethod
+    def generate_output_file(path):
         """
         Generate a function to send the content to the file specified in 'path'
         :param path:
@@ -83,50 +97,79 @@ class TemplateCommand(argparse.Namespace):
         """
 
         def write_file(content):
+            """
+            Function to do write_file operation
+            :param content:
+            :return:
+            """
             with open(path, 'w+') as output:
                 output.write(content)
 
         return write_file
 
-    def generate_s3_template_loader(self, uri):
+    @staticmethod
+    def generate_s3_template_loader(uri):
         """
         Generate a function to load the template from the provided uri.
-        :param path:
+        :param str uri:
         :return:
         """
 
         def load_from_s3():
+            """
+            Function to read template from s3
+            :return:
+            """
             url_parts = urlparse(uri)
-            pass
 
         return load_from_s3
 
-    def generate_file_template_load(self, path):
+    @staticmethod
+    def generate_file_template_load(path):
+        """
+        Generate calleable to return the content of the template on disk
+        :param path:
+        :return:
+        """
         path = os.path.expanduser(os.path.abspath(
-            path
+                path
         ))
 
         def read_file():
-            with open(path, 'r') as template:
+            """
+            Read file from path and return file contents
+            :return:
+            """
+            with open(path) as template:
                 return template.read()
 
         return read_file
 
-    def bad_lambda(self, *args, **kwargs):
+    @staticmethod
+    def bad_lambda(*args, **kwargs):
+        """
+        Callback used in even no lambda is supplied for output
+        :param args:
+        :param kwargs:
+        :return:
+        """
         raise RuntimeError(
-            "Could not run callback with args='{args}',kwargs='{kwargs}'".format(args=args, kwargs=kwargs))
+                "Could not run callback with args='{args}',kwargs='{kwargs}'".format(args=args, kwargs=kwargs))
 
 
-class TemplateRequest():
-    def __init__(self, filter=None, session=default_session, remove_nones=False, vpc_ids=None):
+class TemplateRequest(object):
+    """
+    Do the request to the AWS api, and return a dict with the IP data.
+    """
+
+    def __init__(self, session, filter_dict=None, remove_nones=False, vpc_ids=None):
         """
-        @type filter dict
-        @type session func
         :rtype dict
-        :param filter: Filter for ec2 instances as defined in http://boto3.readthedocs.org/en/latest/reference/services/ec2.html#EC2.Client.describe_instances
-        :param session: If you wish to overload the injection of the boto3 session, otherwise we use a default.
+        :param dict filter_dict: Filter for ec2 instances as defined in http://boto3.readthedocs.org/en/latest/reference
+            /services/ec2.html#EC2.Client.describe_instances
+        :param callable session: If you wish to overload the injection of the boto3 session, otherwise we use a default.
         """
-        self.filter = filter
+        self.filter = filter_dict
         self.session = session
         self.vpc_ids = vpc_ids
         self.remove_nones = remove_nones
@@ -142,8 +185,10 @@ class TemplateRequest():
             if type(self.filter) is not dict:
                 try:
                     filters = json.loads(self.filter)
-                except Exception as TypeError:
+                except TypeError:
                     filters = self._parse_cli_filters(self.filter)
+            else:
+                filters = self.filter
 
             describe_request_params['Filters'] = filters
         if self.vpc_ids is not None:
@@ -176,7 +221,7 @@ class TemplateRequest():
                 private_ip_addresses.append(instance['PrivateIpAddress'])
                 private_hostnames.append(instance['PrivateDnsName'])
 
-                if ('PublicIpAddress' in instance):
+                if 'PublicIpAddress' in instance:
                     public_ips.append(instance['PublicIpAddress'])
                 elif not self.remove_nones:
                     public_ips.append(None)
@@ -198,10 +243,16 @@ class TemplateRequest():
             'reservations': reservations
         }
 
-    def _parse_cli_filters(self, filters):
+    @staticmethod
+    def _parse_cli_filters(filters):
+        """
+        Parse the filters from the CLI and turn them into a filter dict for boto.
+        :param filters:
+        :return:
+        """
         parsed_filters = []
-        for filter in filters:
-            filter_parts = re.match('^Name=(?P<name_value>[^,]+),Values=\[?(?P<key_values>[^\]]+)\]?', filter)
+        for filter_entry in filters:
+            filter_parts = re.match('^Name=(?P<name_value>[^,]+),Values=\[?(?P<key_values>[^\]]+)\]?', filter_entry)
             parsed_filters.append({
                 'Name': filter_parts.group('name_value'),
                 'Values': filter_parts.group('key_values').split(',')
